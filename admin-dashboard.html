@@ -82,7 +82,7 @@
 
       <main class="content">
         <section class="summary-grid" aria-label="Inventory summary">
-          <article class="summary-card">
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-inventory-detail="products">
             <div class="summary-heading">
               <span class="summary-icon total-icon" aria-hidden="true"></span>
               <h2>Total Products</h2>
@@ -91,7 +91,7 @@
             <strong id="totalItemsCount">0</strong>
           </article>
 
-          <article class="summary-card">
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-inventory-detail="lowStock">
             <div class="summary-heading">
               <span class="summary-icon low-icon" aria-hidden="true"></span>
               <h2>Low Stock Items</h2>
@@ -100,7 +100,7 @@
             <strong id="lowStockCount">0</strong>
           </article>
 
-          <article class="summary-card">
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-inventory-detail="stockValue">
             <div class="summary-heading">
               <span class="summary-icon expired-icon" aria-hidden="true"></span>
               <h2>Total Stock Value</h2>
@@ -109,7 +109,7 @@
             <strong id="totalStockValue">₹0</strong>
           </article>
 
-          <article class="summary-card">
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-inventory-detail="outOfStock">
             <div class="summary-heading">
               <span class="summary-icon out-icon" aria-hidden="true"></span>
               <h2>Out of Stock Items</h2>
@@ -117,6 +117,19 @@
             <p>Count of items currently out of stock</p>
             <strong id="outOfStockCount">0</strong>
           </article>
+        </section>
+
+        <section class="inventory-panel dashboard-detail-panel" id="inventoryDetailPanel" hidden>
+          <div class="panel-header">
+            <h2 id="inventoryDetailTitle">Details</h2>
+            <button class="secondary-button small-button" id="inventoryDetailClose" type="button">Close</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="inventoryDetailHead"></thead>
+              <tbody id="inventoryDetailBody"></tbody>
+            </table>
+          </div>
         </section>
 
         <section class="warning-panel" id="lowStockWarning" hidden>

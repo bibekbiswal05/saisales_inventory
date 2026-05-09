@@ -461,6 +461,11 @@
     const lowStockWarning = document.getElementById("lowStockWarning");
     const lowStockWarningText = document.getElementById("lowStockWarningText");
     const recentTransactionsBody = document.getElementById("recentTransactionsBody");
+    const inventoryDetailPanel = document.getElementById("inventoryDetailPanel");
+    const inventoryDetailTitle = document.getElementById("inventoryDetailTitle");
+    const inventoryDetailHead = document.getElementById("inventoryDetailHead");
+    const inventoryDetailBody = document.getElementById("inventoryDetailBody");
+    const inventoryDetailClose = document.getElementById("inventoryDetailClose");
     let products = [];
 
     const render = () => {
@@ -526,6 +531,20 @@
     dateFromFilter?.addEventListener("change", render);
     dateToFilter?.addEventListener("change", render);
 
+    document.querySelectorAll("[data-inventory-detail]").forEach((card) => {
+      card.addEventListener("click", () => renderInventoryDetail(card.dataset.inventoryDetail));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          renderInventoryDetail(card.dataset.inventoryDetail);
+        }
+      });
+    });
+
+    inventoryDetailClose?.addEventListener("click", () => {
+      inventoryDetailPanel.hidden = true;
+    });
+
     window.StockService.subscribeProducts((items) => {
       products = items;
       render();
@@ -535,6 +554,107 @@
 
     if (recentTransactionsBody) {
       subscribeRecentTransactions(recentTransactionsBody);
+    }
+
+    function renderInventoryDetail(type) {
+      if (!inventoryDetailPanel || !inventoryDetailTitle || !inventoryDetailHead || !inventoryDetailBody) {
+        return;
+      }
+
+      const config = getInventoryDetailConfig(type);
+
+      if (!config) {
+        return;
+      }
+
+      inventoryDetailTitle.textContent = config.title;
+      inventoryDetailHead.innerHTML = config.head;
+      inventoryDetailBody.innerHTML = config.body;
+      inventoryDetailPanel.hidden = false;
+      inventoryDetailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function getInventoryDetailConfig(type) {
+      if (type === "products") {
+        return {
+          title: "Total Products Details",
+          head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
+          body: renderInventoryProductRows(products, "No products added yet.", false)
+        };
+      }
+
+      if (type === "lowStock") {
+        const lowProducts = products.filter((product) => getStockStatus(product).key === "low-stock");
+
+        return {
+          title: "Low Stock Details",
+          head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Minimum</th></tr>",
+          body: lowProducts.length ? lowProducts.map((product) => `
+            <tr>
+              <td>${escapeHtml(product.name)}</td>
+              <td>${escapeHtml(product.sku)}</td>
+              <td>${escapeHtml(product.category)}</td>
+              <td>${formatNumber(getQuantity(product))} ${escapeHtml(product.unit)}</td>
+              <td>${formatNumber(product.lowStockLimit || 0)} ${escapeHtml(product.unit)}</td>
+            </tr>
+          `).join("") : `<tr><td class="empty-table" colspan="5">No low stock products right now.</td></tr>`
+        };
+      }
+
+      if (type === "stockValue") {
+        const totalValue = products.reduce((total, product) => total + (getQuantity(product) * Number(product.costPrice || 0)), 0);
+
+        return {
+          title: `Stock Value Details - ${formatMoney(totalValue)}`,
+          head: "<tr><th>Product</th><th>Category</th><th>Stock</th><th>Cost Price</th><th>Value</th></tr>",
+          body: products.length ? products.map((product) => {
+            const quantity = getQuantity(product);
+            const costPrice = Number(product.costPrice || 0);
+
+            return `
+              <tr>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.category)}</td>
+                <td>${formatNumber(quantity)} ${escapeHtml(product.unit)}</td>
+                <td>${formatMoney(costPrice)}</td>
+                <td>${formatMoney(quantity * costPrice)}</td>
+              </tr>
+            `;
+          }).join("") : `<tr><td class="empty-table" colspan="5">No stock value data yet.</td></tr>`
+        };
+      }
+
+      if (type === "outOfStock") {
+        const outProducts = products.filter((product) => getStockStatus(product).key === "out-of-stock");
+
+        return {
+          title: "Out of Stock Details",
+          head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
+          body: renderInventoryProductRows(outProducts, "No out of stock products right now.", false)
+        };
+      }
+
+      return null;
+    }
+
+    function renderInventoryProductRows(items, emptyMessage) {
+      if (!items.length) {
+        return `<tr><td class="empty-table" colspan="5">${emptyMessage}</td></tr>`;
+      }
+
+      return items.map((product) => {
+        const stockStatus = getStockStatus(product);
+
+        return `
+          <tr>
+            <td>${escapeHtml(product.name)}</td>
+            <td>${escapeHtml(product.sku)}</td>
+            <td>${escapeHtml(product.category)}</td>
+            <td>${formatNumber(getQuantity(product))} ${escapeHtml(product.unit)}</td>
+            <td><span class="status ${stockStatus.className}">${stockStatus.label}</span></td>
+          </tr>
+        `;
+      }).join("");
     }
   }
 
