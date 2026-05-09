@@ -465,3 +465,134 @@ nav a:hover {
     flex-direction: column;
   }
 }
+
+@media (max-width: 560px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  main.login-layout {
+    width: 100%;
+    min-height: 100svh;
+    gap: 16px;
+    padding: 14px;
+  }
+
+  .login-panel,
+  .intro {
+    width: 100%;
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .intro {
+    min-height: auto;
+  }
+
+  .intro h1,
+  h1 {
+    font-size: 32px;
+    line-height: 1.12;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .brand-logo {
+    max-width: 190px;
+  }
+
+  .mobile-brand {
+    margin-bottom: 22px;
+  }
+
+  .stats {
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  .stat {
+    min-height: auto;
+    padding: 14px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  input,
+  select,
+  textarea,
+  .button,
+  .login-button,
+  .tool-grid button {
+    min-height: 48px;
+    border-radius: 13px;
+    font-size: 15px;
+  }
+
+  .options {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .app-shell {
+    display: block;
+  }
+
+  aside {
+    padding: 16px;
+  }
+
+  nav {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  nav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .page-main {
+    padding: 18px;
+  }
+
+  .metrics,
+  .tool-grid,
+  .page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card,
+  .metrics article {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .table {
+    min-width: 640px;
+  }
+
+  .card:has(.table),
+  .table-wrap {
+    overflow-x: auto;
+  }
+}
