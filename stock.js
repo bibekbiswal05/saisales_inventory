@@ -576,10 +576,12 @@
 
     function getInventoryDetailConfig(type) {
       if (type === "products") {
+        const stockedProducts = products.filter((product) => getQuantity(product) > 0);
+
         return {
           title: `Total Stock Details - ${formatNumber(getTotalStockQuantity(products))}`,
           head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
-          body: renderInventoryProductRows(products, "No products added yet.", false)
+          body: renderInventoryProductRows(stockedProducts, "No products currently have available stock.")
         };
       }
 
@@ -790,10 +792,12 @@
 
     function getDashboardDetailConfig(type) {
       if (type === "products") {
+        const stockedProducts = products.filter((product) => getQuantity(product) > 0);
+
         return {
           title: `Total Stock Details - ${formatNumber(getTotalStockQuantity(products))}`,
           head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
-          body: products.length ? products.map((product) => {
+          body: stockedProducts.length ? stockedProducts.map((product) => {
             const stockStatus = getStockStatus(product);
 
             return `
@@ -805,7 +809,7 @@
                 <td><span class="status ${stockStatus.className}">${stockStatus.label}</span></td>
               </tr>
             `;
-          }).join("") : `<tr><td class="empty-table" colspan="5">No products added yet.</td></tr>`
+          }).join("") : `<tr><td class="empty-table" colspan="5">No products currently have available stock.</td></tr>`
         };
       }
 
