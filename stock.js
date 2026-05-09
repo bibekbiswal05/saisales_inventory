@@ -936,7 +936,10 @@
       renderBatchRows(rowsBody, "out", products);
     }, (error) => setInlineStatus(status, error.message, true));
 
-    subscribeMovements(stockOutRef, tableBody, "whereUsed", "No stock out entries yet.");
+    subscribeMovements(stockOutRef, tableBody, "whereUsed", "No stock out entries yet.", {
+      actionLabel: "Download",
+      receiptType: "Stock Out"
+    });
     addBatchRow(rowsBody, "out", products);
     setDefaultDate("stockOutDate");
 
@@ -1108,17 +1111,52 @@
     row.remove();
   });
 
-  function subscribeMovements(collectionRef, tableBody, personField, emptyMessage) {
+  function subscribeMovements(collectionRef, tableBody, personField, emptyMessage, options = {}) {
     const movementsQuery = query(collectionRef, orderBy("createdAt", "desc"));
+    const movementsById = new Map();
+    const hasPdfAction = Boolean(options.receiptType);
+    const columnCount = hasPdfAction ? 5 : 4;
+
+    if (hasPdfAction) {
+      tableBody.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-action='download-receipt']");
+
+        if (!button) {
+          return;
+        }
+
+        const movement = movementsById.get(button.dataset.id);
+
+        if (!movement) {
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Preparing...";
+
+        try {
+          await downloadStockReceipt(options.receiptType, [movement], []);
+        } finally {
+          button.disabled = false;
+          button.textContent = options.actionLabel || "PDF";
+        }
+      });
+    }
 
     onSnapshot(movementsQuery, (snapshot) => {
       if (snapshot.empty) {
-        tableBody.innerHTML = `<tr><td class="empty-table" colspan="4">${emptyMessage}</td></tr>`;
+        movementsById.clear();
+        tableBody.innerHTML = `<tr><td class="empty-table" colspan="${columnCount}">${emptyMessage}</td></tr>`;
         return;
       }
 
+      movementsById.clear();
       tableBody.innerHTML = snapshot.docs.map((movementDoc) => {
-        const movement = movementDoc.data();
+        const movement = {
+          id: movementDoc.id,
+          ...movementDoc.data()
+        };
+        movementsById.set(movementDoc.id, movement);
 
         return `
           <tr>
@@ -1126,11 +1164,12 @@
             <td>${escapeHtml(movement.contactName || movement[personField])}</td>
             <td>${escapeHtml(movement.productName)}</td>
             <td>${formatNumber(movement.quantity)} ${escapeHtml(movement.unit)}</td>
+            ${hasPdfAction ? `<td><button class="secondary-button small-button" type="button" data-action="download-receipt" data-id="${escapeAttribute(movementDoc.id)}">${escapeHtml(options.actionLabel || "PDF")}</button></td>` : ""}
           </tr>
         `;
       }).join("");
     }, (error) => {
-      tableBody.innerHTML = `<tr><td class="empty-table" colspan="4">${escapeHtml(error.message)}</td></tr>`;
+      tableBody.innerHTML = `<tr><td class="empty-table" colspan="${columnCount}">${escapeHtml(error.message)}</td></tr>`;
     });
   }
 
@@ -1415,7 +1454,7 @@
       phone: firstEntry.phoneNumber || "-",
       date: firstEntry.movementDate || "-",
       address: firstEntry.address || "-",
-      createdBy: auth.currentUser?.email || auth.currentUser?.uid || "-",
+      createdBy: firstEntry.createdByEmail || firstEntry.createdBy || auth.currentUser?.email || auth.currentUser?.uid || "-",
       items: entries.map((entry) => {
         const product = productById.get(entry.productId) || {};
         const unit = product.unit || entry.unit || "";
