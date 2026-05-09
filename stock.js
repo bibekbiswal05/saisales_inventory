@@ -488,7 +488,7 @@
       const outProducts = products.filter((product) => getStockStatus(product).key === "out-of-stock");
       const alertCount = lowProducts.length + outProducts.length;
 
-      totalItemsCount.textContent = products.length;
+      totalItemsCount.textContent = formatNumber(getTotalStockQuantity(products));
       lowStockCount.textContent = lowProducts.length;
       totalStockValue.textContent = formatMoney(products.reduce((total, product) => total + (getQuantity(product) * Number(product.costPrice || 0)), 0));
       outOfStockCount.textContent = outProducts.length;
@@ -577,7 +577,7 @@
     function getInventoryDetailConfig(type) {
       if (type === "products") {
         return {
-          title: "Total Products Details",
+          title: `Total Stock Details - ${formatNumber(getTotalStockQuantity(products))}`,
           head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
           body: renderInventoryProductRows(products, "No products added yet.", false)
         };
@@ -678,7 +678,7 @@
 
     window.StockService.subscribeProducts((items) => {
       products = items;
-      dashboardTotalProducts.textContent = products.length;
+      dashboardTotalProducts.textContent = formatNumber(getTotalStockQuantity(products));
       if (dashboardLowStockCount) {
         dashboardLowStockCount.textContent = products.filter((product) => {
           const status = getStockStatus(product).key;
@@ -791,7 +791,7 @@
     function getDashboardDetailConfig(type) {
       if (type === "products") {
         return {
-          title: "Total Items Details",
+          title: `Total Stock Details - ${formatNumber(getTotalStockQuantity(products))}`,
           head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
           body: products.length ? products.map((product) => {
             const stockStatus = getStockStatus(product);
@@ -1475,6 +1475,10 @@
 
   function getQuantity(product) {
     return Number(product.quantity ?? product.stock ?? 0);
+  }
+
+  function getTotalStockQuantity(products) {
+    return products.reduce((total, product) => total + getQuantity(product), 0);
   }
 
   function getProductDate(product) {
