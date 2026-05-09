@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock In | Sai Sales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" aria-label="Stock in navigation">
+      <div class="logo-wrap"><div class="logo-orbit" aria-hidden="true"></div></div>
+      <nav class="side-nav">
+        <a href="staff-dashboard.html"><span class="nav-icon grid-icon" aria-hidden="true"></span><span>Dashboard</span></a>
+        <a href="admin-dashboard.html" data-admin-only><span class="nav-icon chart-icon" aria-hidden="true"></span><span>Inventory</span></a>
+        <a href="products.html"><span class="nav-icon book-icon" aria-hidden="true"></span><span>Products</span></a>
+        <a href="suppliers.html"><span class="nav-icon supplier-icon" aria-hidden="true"></span><span>Suppliers</span></a>
+        <a href="users.html" data-admin-only><span class="nav-icon staff-icon" aria-hidden="true"></span><span>Staff Management</span></a>
+        <a href="stock-out.html"><span class="nav-icon cart-icon" aria-hidden="true"></span><span>Stock Out</span></a>
+        <a class="active" href="stock-in.html"><span class="nav-icon safety-icon" aria-hidden="true"></span><span>Stock In</span></a>
+        <a href="reports.html" data-admin-only><span class="nav-icon report-icon" aria-hidden="true"></span><span>Reports & Analysis</span></a>
+        <a href="#" data-admin-only><span class="nav-icon settings-icon" aria-hidden="true"></span><span>Settings</span></a>
+      </nav>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div><h1>Stock In</h1><p>Record incoming stock purchases</p></div>
+        <div class="top-actions">
+          <label class="search-box" for="globalSearch"><span aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search"></label>
+          <button class="notification-button" type="button" aria-label="Notifications"><span></span></button>
+          <button class="profile-button" type="button" onclick="logout()"><span class="avatar" aria-hidden="true">SS</span><span data-role-label>Staff</span><span class="chevron" aria-hidden="true"></span></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="split-grid batch-split">
+          <form class="page-panel" id="stockInForm">
+            <div class="panel-header compact-header">
+              <h2>Add Incoming Stock</h2>
+              <button class="secondary-button small-button" id="addStockInRowButton" type="button">+ Add Row</button>
+            </div>
+            <div class="form-grid batch-contact-grid">
+              <div class="field"><label for="stockInName">Name</label><input id="stockInName" placeholder="Supplier or person name" required></div>
+              <div class="field"><label for="stockInPhone">Phone Number</label><input id="stockInPhone" type="tel" placeholder="Phone number" required></div>
+              <div class="field"><label for="stockInDate">Date</label><input id="stockInDate" type="date" required></div>
+              <div class="field"><label for="stockInAddress">Address</label><textarea id="stockInAddress" placeholder="Address" required></textarea></div>
+            </div>
+            <div class="table-wrap batch-entry-wrap">
+              <table class="batch-entry-table">
+                <thead><tr><th>Product</th><th>Quantity</th><th></th></tr></thead>
+                <tbody id="stockInRows"></tbody>
+              </table>
+            </div>
+            <p class="form-status" id="stockInStatus" role="status"></p>
+            <div class="form-actions"><button class="primary-button" id="saveStockInButton" type="submit">Save All Stock In</button></div>
+          </form>
+
+          <section class="inventory-panel">
+            <div class="panel-header"><h2>Stock In History</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Date</th><th>Name</th><th>Product</th><th>Quantity Added</th></tr></thead>
+                <tbody id="stockInTableBody"><tr><td class="empty-table" colspan="4">No stock in entries yet.</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="firebase.js"></script>
+  <script src="auth.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="stock.js"></script>
+</body>
+</html>

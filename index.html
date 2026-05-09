@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sai Sales Inventory Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <main class="login-layout">
+    <section class="intro">
+      <div class="brand-lockup" aria-label="Sai Sales Inventory Management">
+        <img class="brand-logo" src="assets/sai-sales-logo-transparent.png" alt="Sai Sales">
+      </div>
+
+      <h1>Inventory control for daily sales.</h1>
+      <p class="subtitle">Track stock, manage billing, review purchases, and keep product movement visible from one secure dashboard.</p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">Stock</div>
+          <div class="stat-label">Live inventory view</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Sales</div>
+          <div class="stat-label">Invoice tracking</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Admin</div>
+          <div class="stat-label">Secure access</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="mobile-brand" aria-label="Sai Sales Inventory Management">
+        <img class="brand-logo" src="assets/sai-sales-logo-transparent.png" alt="Sai Sales">
+      </div>
+
+      <h2>Welcome back</h2>
+      <p class="subtitle">Login to continue to Sai Sales Inventory Management.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">Email <span class="required">*</span></label>
+          <input type="email" id="email" placeholder="Enter your mail address" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+            <button class="icon-button" type="button" onclick="togglePassword()" aria-label="Show password">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 3L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M10.6 10.8A2 2 0 0 0 13.2 13.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M7.5 7.8C5.5 8.9 4 10.6 3 12c2.2 3.2 5.2 5 9 5 1.3 0 2.4-.2 3.5-.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10.2 5.2C10.8 5.1 11.4 5 12 5c3.8 0 6.8 1.8 9 5-.5.8-1.2 1.6-2 2.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="options">
+          <label class="remember" for="remember">
+            <input type="checkbox" id="remember" checked>
+            <span>Remember me</span>
+          </label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <p class="error-message" id="errorMessage" role="alert"></p>
+        <button class="login-button" id="loginButton" type="submit">Log In</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="firebase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

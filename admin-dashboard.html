@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Management | Sai Sales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body data-admin-page="true">
+  <div class="admin-shell">
+    <aside class="sidebar" aria-label="Admin navigation">
+      <div class="logo-wrap">
+        <div class="logo-orbit" aria-hidden="true"></div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="dashboard.html">
+          <span class="nav-icon grid-icon" aria-hidden="true"></span>
+          <span>Dashboard</span>
+        </a>
+        <a class="active" href="admin-dashboard.html">
+          <span class="nav-icon chart-icon" aria-hidden="true"></span>
+          <span>Inventory</span>
+        </a>
+        <a href="products.html">
+          <span class="nav-icon book-icon" aria-hidden="true"></span>
+          <span>Products</span>
+        </a>
+        <a href="suppliers.html">
+          <span class="nav-icon supplier-icon" aria-hidden="true"></span>
+          <span>Suppliers</span>
+        </a>
+        <a href="users.html">
+          <span class="nav-icon staff-icon" aria-hidden="true"></span>
+          <span>Staff Management</span>
+        </a>
+        <a href="stock-out.html">
+          <span class="nav-icon cart-icon" aria-hidden="true"></span>
+          <span>Stock Out</span>
+        </a>
+        <a href="stock-in.html">
+          <span class="nav-icon safety-icon" aria-hidden="true"></span>
+          <span>Stock In</span>
+        </a>
+        <a href="reports.html">
+          <span class="nav-icon report-icon" aria-hidden="true"></span>
+          <span>Reports & Analysis</span>
+        </a>
+        <a href="#">
+          <span class="nav-icon settings-icon" aria-hidden="true"></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <h1>Inventory Management</h1>
+          <p>Today, May 7th 2026</p>
+        </div>
+
+        <div class="top-actions">
+          <label class="search-box" for="globalSearch">
+            <span aria-hidden="true"></span>
+            <input id="globalSearch" type="search" placeholder="Search">
+          </label>
+          <button class="notification-button" id="stockAlertButton" type="button" aria-label="Notifications">
+            <span></span>
+            <strong id="stockAlertBadge">0</strong>
+          </button>
+          <button class="profile-button" type="button">
+            <span class="avatar" aria-hidden="true">SS</span>
+            <span>Admin</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="summary-grid" aria-label="Inventory summary">
+          <article class="summary-card">
+            <div class="summary-heading">
+              <span class="summary-icon total-icon" aria-hidden="true"></span>
+              <h2>Total Products</h2>
+            </div>
+            <p>Products created in inventory</p>
+            <strong id="totalItemsCount">0</strong>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-heading">
+              <span class="summary-icon low-icon" aria-hidden="true"></span>
+              <h2>Low Stock Items</h2>
+            </div>
+            <p>Number of items that are running low</p>
+            <strong id="lowStockCount">0</strong>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-heading">
+              <span class="summary-icon expired-icon" aria-hidden="true"></span>
+              <h2>Total Stock Value</h2>
+            </div>
+            <p>Cost value of current stock</p>
+            <strong id="totalStockValue">₹0</strong>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-heading">
+              <span class="summary-icon out-icon" aria-hidden="true"></span>
+              <h2>Out of Stock Items</h2>
+            </div>
+            <p>Count of items currently out of stock</p>
+            <strong id="outOfStockCount">0</strong>
+          </article>
+        </section>
+
+        <section class="warning-panel" id="lowStockWarning" hidden>
+          <div>
+            <h2>Low Stock Warning</h2>
+            <p id="lowStockWarningText">Some products are below their minimum stock level.</p>
+          </div>
+          <button class="secondary-button" type="button" onclick="location.href='products.html'">Review Items</button>
+        </section>
+
+        <section class="inventory-panel">
+          <div class="panel-header">
+            <h2>Inventory Overview</h2>
+            <div class="panel-tools">
+              <label class="table-search" for="itemSearch">
+                <span aria-hidden="true"></span>
+                <input id="itemSearch" type="search" placeholder="Search product or category">
+              </label>
+              <select class="filter-select" id="stockStatusFilter" aria-label="Filter by stock status">
+                <option value="all">All Stock</option>
+                <option value="low-stock">Low Stock</option>
+                <option value="out-of-stock">Out of Stock</option>
+                <option value="active">Good Stock</option>
+              </select>
+              <input class="filter-date" id="dateFromFilter" type="date" aria-label="Date from">
+              <input class="filter-date" id="dateToFilter" type="date" aria-label="Date to">
+              <button class="add-button" type="button" onclick="location.href='products.html'">+ Add Item</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th><span class="checkbox-cell" aria-hidden="true"></span></th>
+                  <th>Item Name</th>
+                  <th>Image</th>
+                  <th>Quantity</th>
+                  <th>Category</th>
+                  <th>Last Updated</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <tr>
+                  <td class="empty-table" colspan="8">No inventory items added yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="inventory-panel transaction-panel">
+          <div class="panel-header">
+            <h2>Recent Transactions</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Product</th>
+                  <th>Details</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody id="recentTransactionsBody">
+                <tr>
+                  <td class="empty-table" colspan="5">No recent transactions yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="firebase.js"></script>
+  <script src="auth.js"></script>
+  <script src="stock.js"></script>
+</body>
+</html>
