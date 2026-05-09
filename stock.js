@@ -545,11 +545,19 @@
     const dashboardLowStockCount = document.getElementById("dashboardLowStockCount");
     const dashboardUsersCount = document.getElementById("dashboardUsersCount");
     const dashboardRecentActivityBody = document.getElementById("dashboardRecentActivityBody");
+    const dashboardDetailPanel = document.getElementById("dashboardDetailPanel");
+    const dashboardDetailTitle = document.getElementById("dashboardDetailTitle");
+    const dashboardDetailHead = document.getElementById("dashboardDetailHead");
+    const dashboardDetailBody = document.getElementById("dashboardDetailBody");
+    const dashboardDetailClose = document.getElementById("dashboardDetailClose");
     const usersRef = collection(db, "users");
+    let products = [];
+    let users = [];
     let stockInItems = [];
     let stockOutItems = [];
 
-    window.StockService.subscribeProducts((products) => {
+    window.StockService.subscribeProducts((items) => {
+      products = items;
       dashboardTotalProducts.textContent = products.length;
       if (dashboardLowStockCount) {
         dashboardLowStockCount.textContent = products.filter((product) => {
@@ -585,12 +593,30 @@
 
     if (dashboardUsersCount && await getCurrentUserRole() === "admin") {
       onSnapshot(query(usersRef), (snapshot) => {
+        users = snapshot.docs.map((userDoc) => ({
+          id: userDoc.id,
+          ...userDoc.data()
+        }));
         dashboardUsersCount.textContent = snapshot.size;
       }, (error) => {
         dashboardUsersCount.textContent = "!";
         console.error(error);
       });
     }
+
+    document.querySelectorAll("[data-dashboard-detail]").forEach((card) => {
+      card.addEventListener("click", () => renderDashboardDetail(card.dataset.dashboardDetail));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          renderDashboardDetail(card.dataset.dashboardDetail);
+        }
+      });
+    });
+
+    dashboardDetailClose?.addEventListener("click", () => {
+      dashboardDetailPanel.hidden = true;
+    });
 
     function renderDashboardActivity() {
       if (!dashboardRecentActivityBody) {
@@ -622,6 +648,95 @@
       if (dashboardRecentActivityBody) {
         dashboardRecentActivityBody.innerHTML = `<tr><td class="empty-table" colspan="5">${escapeHtml(error.message)}</td></tr>`;
       }
+    }
+
+    function renderDashboardDetail(type) {
+      if (!dashboardDetailPanel || !dashboardDetailTitle || !dashboardDetailHead || !dashboardDetailBody) {
+        return;
+      }
+
+      const config = getDashboardDetailConfig(type);
+
+      if (!config) {
+        return;
+      }
+
+      dashboardDetailTitle.textContent = config.title;
+      dashboardDetailHead.innerHTML = config.head;
+      dashboardDetailBody.innerHTML = config.body;
+      dashboardDetailPanel.hidden = false;
+      dashboardDetailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function getDashboardDetailConfig(type) {
+      if (type === "products") {
+        return {
+          title: "Total Items Details",
+          head: "<tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Status</th></tr>",
+          body: products.length ? products.map((product) => {
+            const stockStatus = getStockStatus(product);
+
+            return `
+              <tr>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.sku)}</td>
+                <td>${escapeHtml(product.category)}</td>
+                <td>${formatNumber(getQuantity(product))} ${escapeHtml(product.unit)}</td>
+                <td><span class="status ${stockStatus.className}">${stockStatus.label}</span></td>
+              </tr>
+            `;
+          }).join("") : `<tr><td class="empty-table" colspan="5">No products added yet.</td></tr>`
+        };
+      }
+
+      if (type === "stockIn") {
+        return {
+          title: "Stock In Details",
+          head: "<tr><th>Date</th><th>Name</th><th>Product</th><th>Quantity</th><th>Phone</th></tr>",
+          body: stockInItems.length ? stockInItems.map((entry) => `
+            <tr>
+              <td>${formatMovementDate(entry.movementDate, entry.createdAt)}</td>
+              <td>${escapeHtml(entry.contactName || entry.supplierName)}</td>
+              <td>${escapeHtml(entry.productName)}</td>
+              <td>${formatNumber(entry.quantity)} ${escapeHtml(entry.unit)}</td>
+              <td>${escapeHtml(entry.phoneNumber)}</td>
+            </tr>
+          `).join("") : `<tr><td class="empty-table" colspan="5">No stock in entries yet.</td></tr>`
+        };
+      }
+
+      if (type === "stockOut") {
+        return {
+          title: "Stock Out Details",
+          head: "<tr><th>Date</th><th>Name</th><th>Product</th><th>Quantity</th><th>Phone</th></tr>",
+          body: stockOutItems.length ? stockOutItems.map((entry) => `
+            <tr>
+              <td>${formatMovementDate(entry.movementDate, entry.createdAt)}</td>
+              <td>${escapeHtml(entry.contactName)}</td>
+              <td>${escapeHtml(entry.productName)}</td>
+              <td>${formatNumber(entry.quantity)} ${escapeHtml(entry.unit)}</td>
+              <td>${escapeHtml(entry.phoneNumber)}</td>
+            </tr>
+          `).join("") : `<tr><td class="empty-table" colspan="5">No stock out entries yet.</td></tr>`
+        };
+      }
+
+      if (type === "users") {
+        return {
+          title: "Users Details",
+          head: "<tr><th>Name</th><th>Email</th><th>Role</th><th>User ID</th></tr>",
+          body: users.length ? users.map((user) => `
+            <tr>
+              <td>${escapeHtml(user.name || user.displayName || "-")}</td>
+              <td>${escapeHtml(user.email || "-")}</td>
+              <td>${escapeHtml(user.role || "-")}</td>
+              <td>${escapeHtml(user.id)}</td>
+            </tr>
+          `).join("") : `<tr><td class="empty-table" colspan="4">No users found.</td></tr>`
+        };
+      }
+
+      return null;
     }
   }
 

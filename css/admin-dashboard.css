@@ -1538,6 +1538,19 @@ th {
   box-shadow: var(--shadow);
 }
 
+.clickable-card {
+  cursor: pointer;
+}
+
+.clickable-card:focus-visible {
+  outline: 3px solid rgba(48, 97, 224, 0.28);
+  outline-offset: 4px;
+}
+
+.dashboard-detail-panel[hidden] {
+  display: none;
+}
+
 .summary-card::before,
 .inventory-panel::before,
 .page-panel::before {

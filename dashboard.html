@@ -41,10 +41,23 @@
 
       <main class="content">
         <section class="summary-grid" aria-label="Dashboard summary">
-          <article class="summary-card"><div class="summary-heading"><span class="summary-icon total-icon" aria-hidden="true"></span><h2>Total Items</h2></div><p>Total products in stock</p><strong id="dashboardTotalProducts">0</strong></article>
-          <article class="summary-card"><div class="summary-heading"><span class="summary-icon low-icon" aria-hidden="true"></span><h2>Stock In</h2></div><p>Incoming stock entries</p><strong id="dashboardStockInCount">0</strong></article>
-          <article class="summary-card"><div class="summary-heading"><span class="summary-icon out-icon" aria-hidden="true"></span><h2>Stock Out</h2></div><p>Outgoing stock entries</p><strong id="dashboardStockOutCount">0</strong></article>
-          <article class="summary-card" data-admin-only><div class="summary-heading"><span class="summary-icon expired-icon" aria-hidden="true"></span><h2>Users</h2></div><p>Registered app users</p><strong id="dashboardUsersCount">0</strong></article>
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-dashboard-detail="products"><div class="summary-heading"><span class="summary-icon total-icon" aria-hidden="true"></span><h2>Total Items</h2></div><p>Total products in stock</p><strong id="dashboardTotalProducts">0</strong></article>
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-dashboard-detail="stockIn"><div class="summary-heading"><span class="summary-icon low-icon" aria-hidden="true"></span><h2>Stock In</h2></div><p>Incoming stock entries</p><strong id="dashboardStockInCount">0</strong></article>
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-dashboard-detail="stockOut"><div class="summary-heading"><span class="summary-icon out-icon" aria-hidden="true"></span><h2>Stock Out</h2></div><p>Outgoing stock entries</p><strong id="dashboardStockOutCount">0</strong></article>
+          <article class="summary-card clickable-card" tabindex="0" role="button" data-dashboard-detail="users" data-admin-only><div class="summary-heading"><span class="summary-icon expired-icon" aria-hidden="true"></span><h2>Users</h2></div><p>Registered app users</p><strong id="dashboardUsersCount">0</strong></article>
+        </section>
+
+        <section class="inventory-panel dashboard-detail-panel" id="dashboardDetailPanel" hidden>
+          <div class="panel-header">
+            <h2 id="dashboardDetailTitle">Details</h2>
+            <button class="secondary-button small-button" id="dashboardDetailClose" type="button">Close</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="dashboardDetailHead"></thead>
+              <tbody id="dashboardDetailBody"></tbody>
+            </table>
+          </div>
         </section>
 
         <section class="inventory-panel">
