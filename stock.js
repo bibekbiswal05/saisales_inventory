@@ -887,7 +887,10 @@
       renderBatchRows(rowsBody, "in", products);
     }, (error) => setInlineStatus(status, error.message, true));
 
-    subscribeMovements(stockInRef, tableBody, "supplierName", "No stock in entries yet.");
+    subscribeMovements(stockInRef, tableBody, "supplierName", "No stock in entries yet.", {
+      actionLabel: "Download",
+      receiptType: "Stock In"
+    });
     addBatchRow(rowsBody, "in", products);
     setDefaultDate("stockInDate");
 
@@ -908,11 +911,10 @@
           await window.StockService.recordStockIn(entry);
         }
 
-        await downloadStockReceipt("Stock In", entries, products);
         form.reset();
         setDefaultDate("stockInDate");
         resetBatchRows(rowsBody, "in", products);
-        setInlineStatus(status, `${entries.length} stock in entr${entries.length === 1 ? "y" : "ies"} saved and PDF downloaded.`);
+        setInlineStatus(status, `${entries.length} stock in entr${entries.length === 1 ? "y" : "ies"} saved.`);
       } catch (error) {
         setInlineStatus(status, error.message, true);
       } finally {
