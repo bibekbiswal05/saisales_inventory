@@ -756,6 +756,20 @@ th {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.products-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.products-flow .page-panel {
+  min-height: calc(100vh - 210px);
+}
+
+.products-flow .inventory-panel {
+  min-height: 520px;
+}
+
 .page-panel {
   padding: 26px;
 }
@@ -1751,5 +1765,10 @@ td {
 
   .workspace {
     padding: 18px;
+  }
+
+  .products-flow .page-panel,
+  .products-flow .inventory-panel {
+    min-height: auto;
   }
 }
