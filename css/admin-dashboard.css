@@ -746,6 +746,12 @@ th {
   margin-left: 8px;
 }
 
+.muted-action {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .split-grid {
   display: grid;
   grid-template-columns: minmax(340px, 0.78fr) minmax(0, 1.22fr);
