@@ -1925,12 +1925,17 @@ td {
 
   .topbar {
     display: flex !important;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+    gap: 12px;
     margin: 0 0 16px;
     padding: 0;
     background: transparent;
+  }
+
+  .topbar > div:first-child {
+    min-width: 0;
   }
 
   .topbar h1 {
@@ -1949,7 +1954,8 @@ td {
     justify-content: flex-end;
     flex-direction: row;
     gap: 10px;
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
   }
 
   .search-box {
@@ -2115,11 +2121,7 @@ td {
   }
 
   .top-actions {
-    flex-wrap: wrap;
-  }
-
-  .search-box {
-    flex-basis: 100%;
+    flex-wrap: nowrap;
   }
 
   .summary-card strong {
