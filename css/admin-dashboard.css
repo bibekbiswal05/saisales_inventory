@@ -89,6 +89,10 @@ button {
   letter-spacing: 0;
 }
 
+.mobile-menu-button {
+  display: none;
+}
+
 .logo-orbit {
   position: relative;
   width: 32px;
@@ -1809,7 +1813,56 @@ td {
     width: 100%;
     height: 56px;
     padding: 0;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .logo-wrap::after {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #e5ebf2;
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  }
+
+  .mobile-menu-button span {
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: #111827;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .mobile-menu-button span:nth-child(1) {
+    transform: translateY(-6px);
+  }
+
+  .mobile-menu-button span:nth-child(3) {
+    transform: translateY(6px);
+  }
+
+  .mobile-nav-open .mobile-menu-button span:nth-child(1) {
+    transform: rotate(45deg);
+  }
+
+  .mobile-nav-open .mobile-menu-button span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .mobile-nav-open .mobile-menu-button span:nth-child(3) {
+    transform: rotate(-45deg);
   }
 
   .logo-orbit {
@@ -1819,27 +1872,24 @@ td {
   }
 
   .side-nav {
-    display: flex;
-    gap: 8px;
-    min-height: 0;
-    padding: 8px 0 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .side-nav::-webkit-scrollbar {
     display: none;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    min-height: 0;
+    padding: 12px 0 4px;
   }
 
   .side-nav a {
-    flex: 0 0 auto;
-    width: auto;
-    height: 42px;
-    gap: 8px;
-    padding: 0 12px;
-    border-radius: 14px;
-    font-size: 13px;
-    white-space: nowrap;
+    width: 100%;
+    height: 48px;
+    gap: 12px;
+    padding: 0 14px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .mobile-nav-open .side-nav {
+    display: grid;
   }
 
   .nav-icon {

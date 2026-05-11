@@ -65,6 +65,8 @@
           element.hidden = false;
         });
       }
+
+      initMobileNavigation();
     });
   };
 
@@ -133,5 +135,49 @@
     if (errorMessage) {
       errorMessage.textContent = message;
     }
+  }
+
+  function initMobileNavigation() {
+    const sidebar = document.querySelector(".sidebar");
+    const nav = sidebar?.querySelector(".side-nav");
+    const logoWrap = sidebar?.querySelector(".logo-wrap");
+
+    if (!sidebar || !nav || !logoWrap || sidebar.querySelector(".mobile-menu-button")) {
+      return;
+    }
+
+    const menuButton = document.createElement("button");
+    menuButton.className = "mobile-menu-button";
+    menuButton.type = "button";
+    menuButton.setAttribute("aria-label", "Open navigation menu");
+    menuButton.setAttribute("aria-controls", "mobileNavigation");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.innerHTML = "<span></span><span></span><span></span>";
+    nav.id = nav.id || "mobileNavigation";
+    logoWrap.append(menuButton);
+
+    const closeMenu = () => {
+      document.body.classList.remove("mobile-nav-open");
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open navigation menu");
+    };
+
+    menuButton.addEventListener("click", () => {
+      const isOpen = document.body.classList.toggle("mobile-nav-open");
+      menuButton.setAttribute("aria-expanded", String(isOpen));
+      menuButton.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+    });
+
+    nav.addEventListener("click", (event) => {
+      if (event.target.closest("a")) {
+        closeMenu();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 760) {
+        closeMenu();
+      }
+    });
   }
 })();
