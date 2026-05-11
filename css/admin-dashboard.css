@@ -138,6 +138,17 @@ button {
   transform: translateX(2px);
 }
 
+.side-nav .nav-logout-link {
+  margin-top: 18px;
+  background: #fff3f4;
+  color: #bd2d42;
+}
+
+.side-nav .nav-logout-link:hover {
+  background: #ffe6e9;
+  color: #a82538;
+}
+
 .nav-icon {
   position: relative;
   width: 24px;
@@ -170,6 +181,7 @@ button {
 .safety-icon,
 .report-icon,
 .settings-icon,
+.logout-icon,
 .supplier-icon {
   opacity: 0.8;
 }
@@ -181,6 +193,7 @@ button {
 .safety-icon::before,
 .report-icon::before,
 .settings-icon::before,
+.logout-icon::before,
 .supplier-icon::before {
   content: "";
   position: absolute;
@@ -246,6 +259,24 @@ button {
 .settings-icon::before {
   border-radius: 50%;
   border-width: 5px;
+}
+
+.logout-icon::before {
+  inset: 4px 8px 4px 3px;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+}
+
+.logout-icon::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 11px;
+  width: 11px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: -4px -4px 0 -1px currentColor, -4px 4px 0 -1px currentColor;
 }
 
 .workspace {
@@ -413,17 +444,7 @@ button {
 }
 
 .profile-button {
-  min-width: 146px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  border-radius: 26px;
-  background: #f7f9fa;
-  color: #17242a;
-  font-size: 15px;
-  font-weight: 800;
+  display: none !important;
 }
 
 .avatar {
@@ -1942,11 +1963,7 @@ td {
   }
 
   .profile-button {
-    display: inline-flex !important;
-    width: auto;
-    min-width: 88px;
-    height: 46px;
-    padding: 0 10px;
+    display: none !important;
   }
 
   .profile-button .chevron {

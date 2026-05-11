@@ -142,19 +142,36 @@
     const nav = sidebar?.querySelector(".side-nav");
     const logoWrap = sidebar?.querySelector(".logo-wrap");
 
-    if (!sidebar || !nav || !logoWrap || sidebar.querySelector(".mobile-menu-button")) {
+    if (!sidebar || !nav || !logoWrap) {
       return;
     }
 
-    const menuButton = document.createElement("button");
-    menuButton.className = "mobile-menu-button";
-    menuButton.type = "button";
-    menuButton.setAttribute("aria-label", "Open navigation menu");
-    menuButton.setAttribute("aria-controls", "mobileNavigation");
-    menuButton.setAttribute("aria-expanded", "false");
-    menuButton.innerHTML = "<span></span><span></span><span></span>";
+    if (!nav.querySelector(".nav-logout-link")) {
+      const logoutLink = document.createElement("a");
+      logoutLink.className = "nav-logout-link";
+      logoutLink.href = "index.html";
+      logoutLink.innerHTML = '<span class="nav-icon logout-icon" aria-hidden="true"></span><span>Logout</span>';
+      logoutLink.addEventListener("click", async (event) => {
+        event.preventDefault();
+        await window.logout();
+      });
+      nav.append(logoutLink);
+    }
+
     nav.id = nav.id || "mobileNavigation";
-    logoWrap.append(menuButton);
+
+    let menuButton = sidebar.querySelector(".mobile-menu-button");
+
+    if (!menuButton) {
+      menuButton = document.createElement("button");
+      menuButton.className = "mobile-menu-button";
+      menuButton.type = "button";
+      menuButton.setAttribute("aria-label", "Open navigation menu");
+      menuButton.setAttribute("aria-controls", nav.id);
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.innerHTML = "<span></span><span></span><span></span>";
+      logoWrap.append(menuButton);
+    }
 
     const closeMenu = () => {
       document.body.classList.remove("mobile-nav-open");
