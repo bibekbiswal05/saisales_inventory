@@ -314,6 +314,7 @@ button {
 .top-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 14px;
 }
 
@@ -1945,6 +1946,7 @@ td {
   .top-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     flex-direction: row;
     gap: 10px;
     width: 100%;
