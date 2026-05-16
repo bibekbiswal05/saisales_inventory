@@ -460,6 +460,7 @@
     const stockAlertButton = document.getElementById("stockAlertButton");
     const lowStockWarning = document.getElementById("lowStockWarning");
     const lowStockWarningText = document.getElementById("lowStockWarningText");
+    const downloadLowStockPdfButton = document.getElementById("downloadLowStockPdfButton");
     const recentTransactionsBody = document.getElementById("recentTransactionsBody");
     const inventoryDetailPanel = document.getElementById("inventoryDetailPanel");
     const inventoryDetailTitle = document.getElementById("inventoryDetailTitle");
@@ -530,6 +531,14 @@
     stockStatusFilter?.addEventListener("change", render);
     dateFromFilter?.addEventListener("change", render);
     dateToFilter?.addEventListener("change", render);
+    downloadLowStockPdfButton?.addEventListener("click", () => {
+      const alertProducts = products.filter((product) => {
+        const status = getStockStatus(product).key;
+        return status === "low-stock" || status === "out-of-stock";
+      });
+
+      downloadLowStockReport(alertProducts);
+    });
 
     document.querySelectorAll("[data-inventory-detail]").forEach((card) => {
       card.addEventListener("click", () => renderInventoryDetail(card.dataset.inventoryDetail));
@@ -1444,6 +1453,137 @@
       console.error(error);
       openPrintableReceipt(receipt);
     }
+  }
+
+  function downloadLowStockReport(products) {
+    const title = "Low Stock Alert Report";
+    const dateText = formatDate(new Date());
+    const fileName = `low-stock-alert-${getTodayInputValue()}.pdf`;
+    const jsPdf = window.jspdf?.jsPDF;
+
+    try {
+      if (!jsPdf) {
+        openPrintableLowStockReport(title, dateText, products);
+        return;
+      }
+
+      const pdf = new jsPdf({ unit: "pt", format: "a4" });
+      const margin = 42;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let y = 48;
+
+      const addPageIfNeeded = (height = 24) => {
+        if (y + height <= pageHeight - margin) {
+          return;
+        }
+
+        pdf.addPage();
+        y = margin;
+      };
+
+      pdf.setTextColor(22, 34, 42);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(20);
+      pdf.text("Sai Sales", margin, y);
+      pdf.setFontSize(13);
+      pdf.text(title, pageWidth - margin, y, { align: "right" });
+      y += 26;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.text(`Generated: ${dateText}`, margin, y);
+      pdf.text(`Alert Items: ${products.length}`, pageWidth - margin, y, { align: "right" });
+      y += 18;
+
+      pdf.setDrawColor(229, 234, 237);
+      pdf.line(margin, y, pageWidth - margin, y);
+      y += 24;
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.text("Product", margin, y);
+      pdf.text("SKU", margin + 190, y);
+      pdf.text("Current", margin + 295, y);
+      pdf.text("Minimum", margin + 380, y);
+      pdf.text("Status", pageWidth - margin, y, { align: "right" });
+      y += 10;
+      pdf.line(margin, y, pageWidth - margin, y);
+      y += 18;
+
+      if (!products.length) {
+        pdf.setFont("helvetica", "normal");
+        pdf.text("No low stock or out of stock products right now.", margin, y);
+      }
+
+      products.forEach((product) => {
+        const status = getStockStatus(product);
+
+        addPageIfNeeded(30);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        pdf.text(pdf.splitTextToSize(String(product.name || "-"), 170), margin, y);
+        pdf.text(String(product.sku || "-"), margin + 190, y);
+        pdf.text(`${formatNumber(getQuantity(product))} ${product.unit || ""}`.trim(), margin + 295, y);
+        pdf.text(`${formatNumber(product.lowStockLimit || 0)} ${product.unit || ""}`.trim(), margin + 380, y);
+        pdf.text(status.label, pageWidth - margin, y, { align: "right" });
+        y += 26;
+      });
+
+      pdf.save(fileName);
+    } catch (error) {
+      console.error(error);
+      openPrintableLowStockReport(title, dateText, products);
+    }
+  }
+
+  function openPrintableLowStockReport(title, dateText, products) {
+    const win = window.open("", "_blank", "width=900,height=700");
+
+    if (!win) {
+      return;
+    }
+
+    win.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>${escapeHtml(title)}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 32px; color: #16222a; }
+            h1 { margin: 0 0 4px; }
+            p { margin: 6px 0 18px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+            th, td { border-bottom: 1px solid #e6eaed; padding: 10px; text-align: left; }
+            th:last-child, td:last-child { text-align: right; }
+          </style>
+        </head>
+        <body>
+          <h1>Sai Sales</h1>
+          <h2>${escapeHtml(title)}</h2>
+          <p>Generated: ${escapeHtml(dateText)} | Alert Items: ${products.length}</p>
+          <table>
+            <thead><tr><th>Product</th><th>SKU</th><th>Current</th><th>Minimum</th><th>Status</th></tr></thead>
+            <tbody>
+              ${products.length ? products.map((product) => {
+                const status = getStockStatus(product);
+                return `
+                  <tr>
+                    <td>${escapeHtml(product.name)}</td>
+                    <td>${escapeHtml(product.sku)}</td>
+                    <td>${formatNumber(getQuantity(product))} ${escapeHtml(product.unit)}</td>
+                    <td>${formatNumber(product.lowStockLimit || 0)} ${escapeHtml(product.unit)}</td>
+                    <td>${escapeHtml(status.label)}</td>
+                  </tr>
+                `;
+              }).join("") : `<tr><td colspan="5">No low stock or out of stock products right now.</td></tr>`}
+            </tbody>
+          </table>
+          <script>window.print();<\/script>
+        </body>
+      </html>
+    `);
+    win.document.close();
   }
 
   function buildStockReceipt(type, entries, products) {

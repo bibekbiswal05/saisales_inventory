@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-add-user">
+  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-low-stock-pdf">
 </head>
 <body data-admin-page="true">
   <div class="admin-shell">
@@ -134,7 +134,10 @@
             <h2>Low Stock Warning</h2>
             <p id="lowStockWarningText">Some products are below their minimum stock level.</p>
           </div>
-          <button class="secondary-button" type="button" onclick="location.href='products.html'">Review Items</button>
+          <div class="warning-actions">
+            <button class="secondary-button" id="downloadLowStockPdfButton" type="button">Download PDF</button>
+            <button class="secondary-button" type="button" onclick="location.href='products.html'">Review Items</button>
+          </div>
         </section>
 
         <section class="inventory-panel">
@@ -208,7 +211,8 @@
   </div>
   <script src="firebase.js?v=20260509-mobile2"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
-  <script src="stock.js?v=20260509-mobile2"></script>
-  <script src="pwa.js?v=20260511-pwa"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="stock.js?v=20260516-low-stock-pdf"></script>
+  <script src="pwa.js?v=20260516-low-stock-pdf"></script>
 </body>
 </html>
