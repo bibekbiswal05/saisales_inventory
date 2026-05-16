@@ -838,8 +838,12 @@ th {
 
 .batch-entry-table th:last-child,
 .batch-entry-table td:last-child {
-  width: 58px;
+  width: 130px;
   text-align: center;
+}
+
+.add-row-inline {
+  white-space: nowrap;
 }
 
 .batch-entry-table select,

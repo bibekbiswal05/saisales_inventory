@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-add-user">
+  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-row-add-inline">
 </head>
 <body>
   <div class="admin-shell">
@@ -45,7 +45,6 @@
           <form class="page-panel" id="stockOutForm">
             <div class="panel-header compact-header">
               <h2>Record Outgoing Stock</h2>
-              <button class="secondary-button small-button" id="addStockOutRowButton" type="button">+ Add Row</button>
             </div>
             <div class="form-grid batch-contact-grid">
               <div class="field"><label for="stockOutName">Name</label><input id="stockOutName" placeholder="Customer or person name" required></div>
@@ -55,7 +54,7 @@
             </div>
             <div class="table-wrap batch-entry-wrap">
               <table class="batch-entry-table">
-                <thead><tr><th>Product</th><th>Quantity</th><th></th></tr></thead>
+                <thead><tr><th>Product</th><th>Quantity</th><th><button class="secondary-button small-button add-row-inline" id="addStockOutRowButton" type="button">+ Add Row</button></th></tr></thead>
                 <tbody id="stockOutRows"></tbody>
               </table>
             </div>
