@@ -11,8 +11,6 @@
   const {
     collection,
     onSnapshot,
-    orderBy,
-    query,
     serverTimestamp,
     setDoc,
     doc
@@ -72,22 +70,38 @@
     }
   });
 
-  onSnapshot(query(usersRef, orderBy("role")), (snapshot) => {
+  onSnapshot(usersRef, (snapshot) => {
     if (snapshot.empty) {
       userTableBody.innerHTML = `<tr><td class="empty-table" colspan="5">No users found.</td></tr>`;
       return;
     }
 
-    userTableBody.innerHTML = snapshot.docs.map((userDoc) => {
+    const userDocs = [...snapshot.docs].sort((first, second) => {
+      const firstData = first.data();
+      const secondData = second.data();
+      const firstRole = String(firstData.role || "").toLowerCase();
+      const secondRole = String(secondData.role || "").toLowerCase();
+      const roleSort = firstRole.localeCompare(secondRole);
+
+      if (roleSort !== 0) {
+        return roleSort;
+      }
+
+      return String(firstData.name || firstData.displayName || firstData.email || first.id)
+        .localeCompare(String(secondData.name || secondData.displayName || secondData.email || second.id));
+    });
+
+    userTableBody.innerHTML = userDocs.map((userDoc) => {
       const appUser = userDoc.data();
       const role = String(appUser.role || "-").trim();
+      const status = String(appUser.status || "active").trim();
 
       return `
         <tr>
           <td>${escapeHtml(appUser.name || appUser.displayName || "-")}</td>
           <td>${escapeHtml(appUser.email || "-")}</td>
           <td><span class="status ${role.toLowerCase() === "admin" ? "good" : "low"}">${escapeHtml(role || "-")}</span></td>
-          <td><span class="status good">Active</span></td>
+          <td><span class="status good">${escapeHtml(status || "active")}</span></td>
           <td class="product-actions"><span class="muted-action">${escapeHtml(userDoc.id)}</span></td>
         </tr>
       `;

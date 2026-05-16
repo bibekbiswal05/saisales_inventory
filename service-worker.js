@@ -1,4 +1,4 @@
-const CACHE_NAME = "sai-sales-pwa-v2";
+const CACHE_NAME = "sai-sales-pwa-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
