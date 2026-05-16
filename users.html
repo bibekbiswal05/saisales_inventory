@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260511-notification-header-row">
+  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-add-user">
 </head>
 <body data-admin-page="true">
   <div class="admin-shell">
@@ -44,8 +44,22 @@
         <section class="inventory-panel" data-admin-only>
           <div class="panel-header">
             <h2>Users</h2>
-            <div class="panel-tools"><button class="add-button" type="button">+ Add User</button></div>
+            <div class="panel-tools"><button class="add-button" id="showAddUserButton" type="button">+ Add User</button></div>
           </div>
+          <form class="page-panel embedded-form" id="addUserForm" hidden>
+            <div class="panel-header compact-header">
+              <h2>Add User</h2>
+              <button class="secondary-button small-button" id="cancelAddUserButton" type="button">Cancel</button>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label for="userName">Name</label><input id="userName" placeholder="Enter full name" required></div>
+              <div class="field"><label for="userEmail">Email</label><input id="userEmail" type="email" placeholder="user@example.com" required></div>
+              <div class="field"><label for="userPassword">Password</label><input id="userPassword" type="password" minlength="6" placeholder="Minimum 6 characters" required></div>
+              <div class="field"><label for="userRole">Role</label><select id="userRole" required><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+            </div>
+            <p class="form-status" id="addUserStatus" role="status"></p>
+            <div class="form-actions"><button class="primary-button" id="saveUserButton" type="submit">Save User</button></div>
+          </form>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>User ID</th></tr></thead>
@@ -56,9 +70,9 @@
       </main>
     </div>
   </div>
-  <script src="firebase.js?v=20260509-mobile2"></script>
+  <script src="firebase.js?v=20260516-add-user"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
-  <script src="users.js?v=20260509-mobile2"></script>
+  <script src="users.js?v=20260516-add-user"></script>
   <script src="pwa.js?v=20260511-pwa"></script>
 </body>
 </html>

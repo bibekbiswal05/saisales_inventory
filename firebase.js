@@ -25,6 +25,7 @@
   window.SaiFirebase = {
     app,
     auth,
+    firebaseConfig,
     db,
     firestore
   };

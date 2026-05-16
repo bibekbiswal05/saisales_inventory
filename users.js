@@ -12,9 +12,20 @@
     collection,
     onSnapshot,
     orderBy,
-    query
+    query,
+    serverTimestamp,
+    setDoc,
+    doc
   } = firestore;
-  const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js");
+  const { initializeApp, deleteApp } = await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js");
+  const {
+    createUserWithEmailAndPassword,
+    deleteUser,
+    getAuth,
+    onAuthStateChanged,
+    signOut,
+    updateProfile
+  } = await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js");
 
   const user = await waitForSignedInUser();
 
@@ -23,7 +34,43 @@
   }
 
   const userTableBody = document.getElementById("userTableBody");
+  const showAddUserButton = document.getElementById("showAddUserButton");
+  const addUserForm = document.getElementById("addUserForm");
+  const cancelAddUserButton = document.getElementById("cancelAddUserButton");
+  const addUserStatus = document.getElementById("addUserStatus");
+  const saveUserButton = document.getElementById("saveUserButton");
   const usersRef = collection(db, "users");
+
+  showAddUserButton?.addEventListener("click", () => {
+    addUserForm.hidden = false;
+    addUserStatus.textContent = "";
+    addUserStatus.classList.remove("error");
+    document.getElementById("userName")?.focus();
+  });
+
+  cancelAddUserButton?.addEventListener("click", () => {
+    addUserForm.reset();
+    addUserForm.hidden = true;
+    setStatus("");
+  });
+
+  addUserForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setStatus("");
+    saveUserButton.disabled = true;
+    saveUserButton.textContent = "Saving...";
+
+    try {
+      const appUser = await createAppUser();
+      addUserForm.reset();
+      setStatus(`${appUser.name} added successfully.`);
+    } catch (error) {
+      setStatus(getFriendlyAuthError(error), true);
+    } finally {
+      saveUserButton.disabled = false;
+      saveUserButton.textContent = "Save User";
+    }
+  });
 
   onSnapshot(query(usersRef, orderBy("role")), (snapshot) => {
     if (snapshot.empty) {
@@ -67,6 +114,82 @@
         resolve(currentUser);
       });
     });
+  }
+
+  async function createAppUser() {
+    const name = document.getElementById("userName").value.trim();
+    const email = document.getElementById("userEmail").value.trim();
+    const password = document.getElementById("userPassword").value;
+    const role = document.getElementById("userRole").value;
+
+    if (!name) {
+      throw new Error("Enter user name.");
+    }
+
+    if (!email) {
+      throw new Error("Enter user email.");
+    }
+
+    if (!password || password.length < 6) {
+      throw new Error("Password must be at least 6 characters.");
+    }
+
+    const secondaryApp = initializeApp(window.SaiFirebase.firebaseConfig, `user-create-${Date.now()}`);
+    const secondaryAuth = getAuth(secondaryApp);
+    let credential;
+
+    try {
+      credential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      await updateProfile(credential.user, { displayName: name });
+
+      await setDoc(doc(db, "users", credential.user.uid), {
+        name,
+        displayName: name,
+        email,
+        role,
+        status: "active",
+        createdBy: auth.currentUser?.uid || "",
+        createdByEmail: auth.currentUser?.email || "",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      return { name, email, role };
+    } catch (error) {
+      if (credential?.user) {
+        await deleteUser(credential.user).catch(() => {});
+      }
+
+      throw error;
+    } finally {
+      await signOut(secondaryAuth).catch(() => {});
+      await deleteApp(secondaryApp).catch(() => {});
+    }
+  }
+
+  function setStatus(message, isError = false) {
+    if (!addUserStatus) {
+      return;
+    }
+
+    addUserStatus.textContent = message;
+    addUserStatus.classList.toggle("error", Boolean(isError));
+  }
+
+  function getFriendlyAuthError(error) {
+    if (error.code === "auth/email-already-in-use") {
+      return "This email is already added.";
+    }
+
+    if (error.code === "auth/invalid-email") {
+      return "Enter a valid email address.";
+    }
+
+    if (error.code === "auth/weak-password") {
+      return "Password must be at least 6 characters.";
+    }
+
+    return error.message || "Unable to add user.";
   }
 
   function escapeHtml(value) {
