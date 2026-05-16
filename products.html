@@ -67,7 +67,10 @@
           <section class="inventory-panel">
             <div class="panel-header">
               <h2>Product List</h2>
-              <button class="secondary-button small-button" id="importGovtProductsButton" type="button">Import Govt Price List</button>
+              <div class="panel-tools">
+                <label class="table-search" for="productListSearch"><span aria-hidden="true"></span><input id="productListSearch" type="search" placeholder="Search product, SKU, category"></label>
+                <button class="secondary-button small-button" id="importGovtProductsButton" type="button">Import Govt Price List</button>
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -83,7 +86,7 @@
   <script src="firebase.js?v=20260509-mobile2"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
   <script src="product-catalog.js?v=20260509-mobile2"></script>
-  <script src="stock.js?v=20260509-mobile2"></script>
+  <script src="stock.js?v=20260516-product-search"></script>
   <script src="pwa.js?v=20260511-pwa"></script>
 </body>
 </html>

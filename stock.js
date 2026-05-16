@@ -217,6 +217,7 @@
     const saveButton = document.getElementById("saveProductButton");
     const cancelEditButton = document.getElementById("cancelEditButton");
     const importGovtProductsButton = document.getElementById("importGovtProductsButton");
+    const productListSearch = document.getElementById("productListSearch");
     const tableBody = document.getElementById("productTableBody");
     const canViewPrices = () => document.body.dataset.role === "admin";
     let products = [];
@@ -269,6 +270,7 @@
     });
 
     cancelEditButton.addEventListener("click", resetForm);
+    productListSearch?.addEventListener("input", () => renderProducts(getFilteredProducts()));
 
     importGovtProductsButton?.addEventListener("click", async () => {
       const catalog = window.SaiProductCatalog || [];
@@ -350,12 +352,23 @@
 
     window.StockService.subscribeProducts((items) => {
       products = items;
-      renderProducts(products);
+      renderProducts(getFilteredProducts());
     }, (error) => setStatus(error.message, true));
+
+    function getFilteredProducts() {
+      const searchTerm = (productListSearch?.value || "").trim().toLowerCase();
+
+      if (!searchTerm) {
+        return products;
+      }
+
+      return products.filter((product) => [product.name, product.sku, product.category, product.unit]
+        .some((value) => String(value || "").toLowerCase().includes(searchTerm)));
+    }
 
     function renderProducts(items) {
       if (!items.length) {
-        tableBody.innerHTML = `<tr><td class="empty-table" colspan="7">No products added yet.</td></tr>`;
+        tableBody.innerHTML = `<tr><td class="empty-table" colspan="7">${products.length ? "No products match your search." : "No products added yet."}</td></tr>`;
         return;
       }
 
