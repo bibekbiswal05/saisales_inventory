@@ -135,6 +135,7 @@
     const email = document.getElementById("userEmail").value.trim();
     const password = document.getElementById("userPassword").value;
     const role = document.getElementById("userRole").value;
+    const existingUserUid = document.getElementById("existingUserUid").value.trim();
 
     if (!name) {
       throw new Error("Enter user name.");
@@ -142,6 +143,11 @@
 
     if (!email) {
       throw new Error("Enter user email.");
+    }
+
+    if (existingUserUid) {
+      await saveUserProfile(existingUserUid, { name, email, role });
+      return { name, email, role };
     }
 
     if (!password || password.length < 6) {
@@ -156,17 +162,7 @@
       credential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
       await updateProfile(credential.user, { displayName: name });
 
-      await setDoc(doc(db, "users", credential.user.uid), {
-        name,
-        displayName: name,
-        email,
-        role,
-        status: "active",
-        createdBy: auth.currentUser?.uid || "",
-        createdByEmail: auth.currentUser?.email || "",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
+      await saveUserProfile(credential.user.uid, { name, email, role });
 
       return { name, email, role };
     } catch (error) {
@@ -181,6 +177,20 @@
     }
   }
 
+  async function saveUserProfile(uid, appUser) {
+    await setDoc(doc(db, "users", uid), {
+      name: appUser.name,
+      displayName: appUser.name,
+      email: appUser.email,
+      role: appUser.role,
+      status: "active",
+      createdBy: auth.currentUser?.uid || "",
+      createdByEmail: auth.currentUser?.email || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }
+
   function setStatus(message, isError = false) {
     if (!addUserStatus) {
       return;
@@ -192,7 +202,7 @@
 
   function getFriendlyAuthError(error) {
     if (error.code === "auth/email-already-in-use") {
-      return "This email is already added.";
+      return "This email already exists in Firebase Authentication. Copy that user's UID from Firebase Authentication and paste it in Existing Firebase UID, then save again.";
     }
 
     if (error.code === "auth/invalid-email") {

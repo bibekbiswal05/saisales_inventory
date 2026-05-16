@@ -56,6 +56,7 @@
               <div class="field"><label for="userEmail">Email</label><input id="userEmail" type="email" placeholder="user@example.com" required></div>
               <div class="field"><label for="userPassword">Password</label><input id="userPassword" type="password" minlength="6" placeholder="Minimum 6 characters" required></div>
               <div class="field"><label for="userRole">Role</label><select id="userRole" required><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+              <div class="field"><label for="existingUserUid">Existing Firebase UID</label><input id="existingUserUid" placeholder="Only if user already exists in Authentication"></div>
             </div>
             <p class="form-status" id="addUserStatus" role="status"></p>
             <div class="form-actions"><button class="primary-button" id="saveUserButton" type="submit">Save User</button></div>
@@ -72,7 +73,7 @@
   </div>
   <script src="firebase.js?v=20260516-add-user"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
-  <script src="users.js?v=20260516-users-list-all"></script>
+  <script src="users.js?v=20260516-existing-auth-user"></script>
   <script src="pwa.js?v=20260511-pwa"></script>
 </body>
 </html>
