@@ -1,4 +1,4 @@
-const CACHE_NAME = "sai-sales-pwa-v7";
+const CACHE_NAME = "sai-sales-pwa-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -18,7 +18,6 @@ const APP_SHELL = [
   "./stock.js",
   "./suppliers.js",
   "./users.js",
-  "./product-catalog.js",
   "./assets/sai-sales-logo-transparent.png",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",

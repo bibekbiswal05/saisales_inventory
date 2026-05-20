@@ -216,7 +216,6 @@
     const status = document.getElementById("productStatus");
     const saveButton = document.getElementById("saveProductButton");
     const cancelEditButton = document.getElementById("cancelEditButton");
-    const importGovtProductsButton = document.getElementById("importGovtProductsButton");
     const productListSearch = document.getElementById("productListSearch");
     const tableBody = document.getElementById("productTableBody");
     const canViewPrices = () => document.body.dataset.role === "admin";
@@ -271,44 +270,6 @@
 
     cancelEditButton.addEventListener("click", resetForm);
     productListSearch?.addEventListener("input", () => renderProducts(getFilteredProducts()));
-
-    importGovtProductsButton?.addEventListener("click", async () => {
-      const catalog = window.SaiProductCatalog || [];
-
-      if (!catalog.length) {
-        setStatus("No price list catalog found.", true);
-        return;
-      }
-
-      const existingSkus = new Set(products.map((product) => product.sku));
-      const missingProducts = catalog.filter((product) => !existingSkus.has(product.sku));
-
-      if (!missingProducts.length) {
-        setStatus("All Govt price list products are already imported.");
-        return;
-      }
-
-      importGovtProductsButton.disabled = true;
-      importGovtProductsButton.textContent = "Importing...";
-      setStatus(`Importing ${missingProducts.length} products...`);
-
-      try {
-        for (const product of missingProducts) {
-          await window.StockService.addProduct({
-            ...product,
-            imageDataUrl: "",
-            status: getStockStatus(product).key
-          });
-        }
-
-        setStatus(`${missingProducts.length} Govt price list products imported.`);
-      } catch (error) {
-        setStatus(error.message, true);
-      } finally {
-        importGovtProductsButton.disabled = false;
-        importGovtProductsButton.textContent = "Import Govt Price List";
-      }
-    });
 
     tableBody.addEventListener("click", async (event) => {
       const actionButton = event.target.closest("[data-action]");
