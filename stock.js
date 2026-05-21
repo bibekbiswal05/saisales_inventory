@@ -23,13 +23,16 @@
     query,
     runTransaction,
     serverTimestamp,
-    updateDoc
+    Timestamp,
+    updateDoc,
+    writeBatch
   } = firestore;
 
   const productsRef = collection(db, "products");
   const stockInRef = collection(db, "stockIn");
   const stockOutRef = collection(db, "stockOut");
   const suppliersRef = collection(db, "suppliers");
+  const backupCollections = ["products", "suppliers", "users", "stockIn", "stockOut", "stockMovements", "reports"];
 
   window.StockService = {
     async addProduct(product) {
@@ -1212,6 +1215,9 @@
     const exportPdfButton = document.getElementById("exportPdfButton");
     const exportExcelButton = document.getElementById("exportExcelButton");
     const printStockReportButton = document.getElementById("printStockReportButton");
+    const exportBackupButton = document.getElementById("exportBackupButton");
+    const importBackupInput = document.getElementById("importBackupInput");
+    const backupStatus = document.getElementById("backupStatus");
     let products = [];
     let purchases = [];
     let usage = [];
@@ -1315,6 +1321,55 @@
 
       downloadCsv("sai-sales-reports.csv", rows);
     });
+
+    exportBackupButton?.addEventListener("click", async () => {
+      setBackupStatus("Preparing full backup...");
+      exportBackupButton.disabled = true;
+
+      try {
+        const backup = await createFullBackup();
+        downloadJson(`sai-sales-full-backup-${getTodayInputValue()}.json`, backup);
+        setBackupStatus("Full backup downloaded.");
+      } catch (error) {
+        setBackupStatus(error.message, true);
+      } finally {
+        exportBackupButton.disabled = false;
+      }
+    });
+
+    importBackupInput?.addEventListener("change", async () => {
+      const file = importBackupInput.files?.[0];
+
+      if (!file) {
+        return;
+      }
+
+      const shouldImport = confirm("Import this backup? Existing documents with the same IDs will be overwritten.");
+      importBackupInput.value = "";
+
+      if (!shouldImport) {
+        return;
+      }
+
+      setBackupStatus("Importing backup...");
+
+      try {
+        const backup = JSON.parse(await file.text());
+        const restoredCount = await restoreFullBackup(backup);
+        setBackupStatus(`${restoredCount} document${restoredCount === 1 ? "" : "s"} restored from backup.`);
+      } catch (error) {
+        setBackupStatus(error.message, true);
+      }
+    });
+
+    function setBackupStatus(message, isError = false) {
+      if (!backupStatus) {
+        return;
+      }
+
+      backupStatus.textContent = message;
+      backupStatus.classList.toggle("error", Boolean(isError));
+    }
   }
 
   function fillProductSelect(select, products) {
@@ -1794,6 +1849,112 @@
     link.download = filename;
     link.click();
     URL.revokeObjectURL(link.href);
+  }
+
+  function downloadJson(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function createFullBackup() {
+    const collections = {};
+
+    for (const collectionName of backupCollections) {
+      const snapshot = await getDocs(collection(db, collectionName));
+      collections[collectionName] = snapshot.docs.map((entryDoc) => ({
+        id: entryDoc.id,
+        data: serializeBackupValue(entryDoc.data())
+      }));
+    }
+
+    return {
+      app: "sai-sales-inventory",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      collections
+    };
+  }
+
+  async function restoreFullBackup(backup) {
+    if (!backup || backup.app !== "sai-sales-inventory" || !backup.collections) {
+      throw new Error("Invalid Sai Sales backup file.");
+    }
+
+    let restoredCount = 0;
+    let batch = writeBatch(db);
+    let batchSize = 0;
+
+    const commitBatch = async () => {
+      if (!batchSize) {
+        return;
+      }
+
+      await batch.commit();
+      batch = writeBatch(db);
+      batchSize = 0;
+    };
+
+    for (const collectionName of backupCollections) {
+      const documents = Array.isArray(backup.collections[collectionName]) ? backup.collections[collectionName] : [];
+
+      for (const backupDoc of documents) {
+        if (!backupDoc?.id || !backupDoc.data || typeof backupDoc.data !== "object") {
+          continue;
+        }
+
+        batch.set(doc(db, collectionName, backupDoc.id), deserializeBackupValue(backupDoc.data), { merge: true });
+        restoredCount += 1;
+        batchSize += 1;
+
+        if (batchSize >= 450) {
+          await commitBatch();
+        }
+      }
+    }
+
+    await commitBatch();
+    return restoredCount;
+  }
+
+  function serializeBackupValue(value) {
+    if (value && typeof value.toDate === "function" && typeof value.seconds === "number") {
+      return {
+        __type: "timestamp",
+        seconds: value.seconds,
+        nanoseconds: value.nanoseconds || 0
+      };
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(serializeBackupValue);
+    }
+
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, nestedValue]) => [key, serializeBackupValue(nestedValue)]));
+    }
+
+    return value;
+  }
+
+  function deserializeBackupValue(value) {
+    if (Array.isArray(value)) {
+      return value.map(deserializeBackupValue);
+    }
+
+    if (value && typeof value === "object") {
+      if (value.__type === "timestamp" && typeof value.seconds === "number") {
+        return new Timestamp(value.seconds, value.nanoseconds || 0);
+      }
+
+      return Object.fromEntries(Object.entries(value).map(([key, nestedValue]) => [key, deserializeBackupValue(nestedValue)]));
+    }
+
+    return value;
   }
 
   function printTable(title, tableHtml) {

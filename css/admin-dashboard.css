@@ -614,6 +614,29 @@ button {
   justify-content: flex-end;
 }
 
+.backup-panel {
+  flex-wrap: wrap;
+}
+
+.backup-panel > div:first-child {
+  flex: 1 1 320px;
+}
+
+.backup-status {
+  flex: 1 0 100%;
+}
+
+.file-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .inventory-panel + .inventory-panel {
   margin-top: 22px;
 }

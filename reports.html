@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-add-user">
+  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260521-backup-restore">
 </head>
 <body data-admin-page="true">
   <div class="admin-shell">
@@ -60,6 +60,19 @@
           </div>
         </section>
 
+        <section class="warning-panel backup-panel" data-admin-only>
+          <div>
+            <h2>Full Data Backup</h2>
+            <p>Download one backup file for products, suppliers, users, stock entries, and reports. Import a backup file to restore saved data.</p>
+          </div>
+          <div class="panel-tools">
+            <button class="primary-button" id="exportBackupButton" type="button">Export Full Backup</button>
+            <label class="secondary-button file-action" for="importBackupInput">Import Backup</label>
+            <input id="importBackupInput" type="file" accept="application/json,.json" hidden>
+          </div>
+          <p class="form-status backup-status" id="backupStatus" role="status"></p>
+        </section>
+
         <section class="inventory-panel">
           <div class="panel-header">
             <h2>Stock Report</h2>
@@ -100,7 +113,7 @@
   </div>
   <script src="firebase.js?v=20260509-mobile2"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
-  <script src="stock.js?v=20260509-mobile2"></script>
-  <script src="pwa.js?v=20260511-pwa"></script>
+  <script src="stock.js?v=20260521-backup-restore"></script>
+  <script src="pwa.js?v=20260521-backup-restore"></script>
 </body>
 </html>
