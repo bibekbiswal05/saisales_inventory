@@ -870,6 +870,7 @@
 
     window.StockService.subscribeProducts((items) => {
       products = items;
+      updateProductDatalist(products);
       renderBatchRows(rowsBody, "in", products);
     }, (error) => setInlineStatus(status, error.message, true));
 
@@ -891,7 +892,7 @@
       saveButton.textContent = "Saving...";
 
       try {
-        const entries = getBatchEntries(rowsBody, "in", getBatchDetails("stockIn"));
+        const entries = getBatchEntries(rowsBody, "in", getBatchDetails("stockIn"), products);
 
         for (const entry of entries) {
           await window.StockService.recordStockIn(entry);
@@ -921,6 +922,7 @@
 
     window.StockService.subscribeProducts((items) => {
       products = items;
+      updateProductDatalist(products);
       renderBatchRows(rowsBody, "out", products);
     }, (error) => setInlineStatus(status, error.message, true));
 
@@ -942,7 +944,7 @@
       saveButton.textContent = "Saving...";
 
       try {
-        const entries = getBatchEntries(rowsBody, "out", getBatchDetails("stockOut"));
+        const entries = getBatchEntries(rowsBody, "out", getBatchDetails("stockOut"), products);
 
         for (const entry of entries) {
           await window.StockService.recordStockOut(entry);
@@ -987,26 +989,24 @@
     }
 
     rows.forEach((row) => {
-      const productValue = row.querySelector("[data-field='productId']")?.value || "";
+      const productValue = row.querySelector("[data-field='productSearch']")?.value || "";
       const quantityValue = row.querySelector("[data-field='quantity']")?.value || "";
 
       row.innerHTML = getBatchRowHtml(type, products);
-      row.querySelector("[data-field='productId']").value = productValue;
+      row.querySelector("[data-field='productSearch']").value = productValue;
       row.querySelector("[data-field='quantity']").value = quantityValue;
     });
   }
 
   function getBatchRowHtml(type, products = []) {
-    const productOptions = getProductOptions(products);
-
     return `
-      <td><select data-field="productId" required>${productOptions}</select></td>
+      <td><input data-field="productSearch" list="batchProductOptions" placeholder="Type product name, SKU, category" autocomplete="off" required></td>
       <td><input data-field="quantity" type="number" min="1" step="0.01" placeholder="0" required></td>
       <td><button class="icon-action remove-row-button" type="button" aria-label="Remove row">x</button></td>
     `;
   }
 
-  function getBatchEntries(rowsBody, type, batchDetails) {
+  function getBatchEntries(rowsBody, type, batchDetails, products = []) {
     const rows = [...rowsBody.querySelectorAll("tr")];
 
     if (!rows.length) {
@@ -1015,11 +1015,16 @@
 
     return rows.map((row, index) => {
       const rowNumber = index + 1;
-      const productId = row.querySelector("[data-field='productId']").value;
+      const productText = row.querySelector("[data-field='productSearch']").value.trim();
+      const product = resolveProductFromText(productText, products);
       const quantity = Number(row.querySelector("[data-field='quantity']").value || 0);
 
-      if (!productId) {
+      if (!productText) {
         throw new Error(`Row ${rowNumber}: select a product.`);
+      }
+
+      if (!product) {
+        throw new Error(`Row ${rowNumber}: no matching product found.`);
       }
 
       if (quantity <= 0) {
@@ -1029,7 +1034,7 @@
       if (type === "in") {
         return {
           ...batchDetails,
-          productId,
+          productId: product.id,
           quantity,
           supplierName: batchDetails.contactName
         };
@@ -1037,11 +1042,52 @@
 
       return {
         ...batchDetails,
-        productId,
+        productId: product.id,
         quantity,
         whereUsed: batchDetails.address || batchDetails.contactName
       };
     });
+  }
+
+  function updateProductDatalist(products = []) {
+    let datalist = document.getElementById("batchProductOptions");
+
+    if (!datalist) {
+      datalist = document.createElement("datalist");
+      datalist.id = "batchProductOptions";
+      document.body.append(datalist);
+    }
+
+    datalist.innerHTML = products.map((product) => `
+      <option value="${escapeAttribute(getProductSearchLabel(product))}"></option>
+    `).join("");
+  }
+
+  function resolveProductFromText(productText, products = []) {
+    const searchText = productText.trim().toLowerCase();
+
+    if (!searchText) {
+      return null;
+    }
+
+    const exactMatch = products.find((product) => getProductSearchLabel(product).toLowerCase() === searchText);
+
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    const matches = products.filter((product) => [
+      product.name,
+      product.sku,
+      product.category,
+      getProductSearchLabel(product)
+    ].some((value) => String(value || "").toLowerCase().includes(searchText)));
+
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  function getProductSearchLabel(product) {
+    return `${product.name || "Unnamed product"} | ${product.sku || "No SKU"} | ${formatNumber(getQuantity(product))} ${product.unit || ""}`.trim();
   }
 
   function getBatchDetails(prefix) {
