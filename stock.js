@@ -884,6 +884,8 @@
     addRowButton.addEventListener("click", () => {
       addBatchRow(rowsBody, "in", products);
     });
+    rowsBody.addEventListener("input", () => maybeAddBatchRow(rowsBody, "in", products));
+    rowsBody.addEventListener("change", () => maybeAddBatchRow(rowsBody, "in", products));
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -936,6 +938,8 @@
     addRowButton.addEventListener("click", () => {
       addBatchRow(rowsBody, "out", products);
     });
+    rowsBody.addEventListener("input", () => maybeAddBatchRow(rowsBody, "out", products));
+    rowsBody.addEventListener("change", () => maybeAddBatchRow(rowsBody, "out", products));
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -976,6 +980,19 @@
     addBatchRow(rowsBody, type, products);
   }
 
+  function maybeAddBatchRow(rowsBody, type, products = []) {
+    const rows = [...rowsBody.querySelectorAll("tr")];
+    const lastRow = rows.at(-1);
+
+    if (!lastRow || isBatchRowBlank(lastRow)) {
+      return;
+    }
+
+    if (isBatchRowComplete(lastRow, products)) {
+      addBatchRow(rowsBody, type, products);
+    }
+  }
+
   function renderBatchRows(rowsBody, type, products = []) {
     if (!rowsBody) {
       return;
@@ -1007,7 +1024,7 @@
   }
 
   function getBatchEntries(rowsBody, type, batchDetails, products = []) {
-    const rows = [...rowsBody.querySelectorAll("tr")];
+    const rows = [...rowsBody.querySelectorAll("tr")].filter((row) => !isBatchRowBlank(row));
 
     if (!rows.length) {
       throw new Error("Add at least one row.");
@@ -1047,6 +1064,20 @@
         whereUsed: batchDetails.address || batchDetails.contactName
       };
     });
+  }
+
+  function isBatchRowBlank(row) {
+    const productText = row.querySelector("[data-field='productSearch']")?.value.trim() || "";
+    const quantity = row.querySelector("[data-field='quantity']")?.value.trim() || "";
+
+    return !productText && !quantity;
+  }
+
+  function isBatchRowComplete(row, products = []) {
+    const productText = row.querySelector("[data-field='productSearch']")?.value.trim() || "";
+    const quantity = Number(row.querySelector("[data-field='quantity']")?.value || 0);
+
+    return Boolean(resolveProductFromText(productText, products)) && quantity > 0;
   }
 
   function updateProductDatalist(products = []) {
