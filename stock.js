@@ -895,7 +895,7 @@
       saveButton.textContent = "Saving...";
 
       try {
-        const entries = getBatchEntries(rowsBody, "in", getBatchDetails("stockIn"), products);
+        const entries = addBatchId(getBatchEntries(rowsBody, "in", getBatchDetails("stockIn"), products), "stock-in");
 
         for (const entry of entries) {
           await window.StockService.recordStockIn(entry);
@@ -949,7 +949,7 @@
       saveButton.textContent = "Saving...";
 
       try {
-        const entries = getBatchEntries(rowsBody, "out", getBatchDetails("stockOut"), products);
+        const entries = addBatchId(getBatchEntries(rowsBody, "out", getBatchDetails("stockOut"), products), "stock-out");
 
         for (const entry of entries) {
           await window.StockService.recordStockOut(entry);
@@ -979,6 +979,15 @@
   function resetBatchRows(rowsBody, type, products = []) {
     rowsBody.innerHTML = "";
     addBatchRow(rowsBody, type, products);
+  }
+
+  function addBatchId(entries, prefix) {
+    const batchId = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    return entries.map((entry) => ({
+      ...entry,
+      batchId
+    }));
   }
 
   function maybeAddBatchRow(rowsBody, type, products = []) {
@@ -1175,7 +1184,7 @@
 
   function subscribeMovements(collectionRef, tableBody, personField, emptyMessage, options = {}) {
     const movementsQuery = query(collectionRef, orderBy("createdAt", "desc"));
-    const movementsById = new Map();
+    const receiptGroups = new Map();
     const hasPdfAction = Boolean(options.receiptType);
     const columnCount = hasPdfAction ? 5 : 4;
 
@@ -1187,9 +1196,9 @@
           return;
         }
 
-        const movement = movementsById.get(button.dataset.id);
+        const group = receiptGroups.get(button.dataset.id);
 
-        if (!movement) {
+        if (!group) {
           return;
         }
 
@@ -1197,7 +1206,7 @@
         button.textContent = "Preparing...";
 
         try {
-          await downloadStockReceipt(options.receiptType, [movement], []);
+          await downloadStockReceipt(options.receiptType, group.entries, []);
         } finally {
           button.disabled = false;
           button.textContent = options.actionLabel || "PDF";
@@ -1207,32 +1216,69 @@
 
     onSnapshot(movementsQuery, (snapshot) => {
       if (snapshot.empty) {
-        movementsById.clear();
+        receiptGroups.clear();
         tableBody.innerHTML = `<tr><td class="empty-table" colspan="${columnCount}">${emptyMessage}</td></tr>`;
         return;
       }
 
-      movementsById.clear();
-      tableBody.innerHTML = snapshot.docs.map((movementDoc) => {
+      receiptGroups.clear();
+      snapshot.docs.forEach((movementDoc) => {
         const movement = {
           id: movementDoc.id,
           ...movementDoc.data()
         };
-        movementsById.set(movementDoc.id, movement);
+        const groupId = movement.batchId || movementDoc.id;
+        const currentGroup = receiptGroups.get(groupId);
+
+        if (currentGroup) {
+          currentGroup.entries.push(movement);
+          currentGroup.latestAt = Math.max(currentGroup.latestAt, getTimestampMs(movement.createdAt));
+          return;
+        }
+
+        receiptGroups.set(groupId, {
+          id: groupId,
+          latestAt: getTimestampMs(movement.createdAt),
+          entries: [movement]
+        });
+      });
+
+      const groups = [...receiptGroups.values()].sort((first, second) => second.latestAt - first.latestAt);
+
+      tableBody.innerHTML = groups.map((group) => {
+        const movement = group.entries[0] || {};
+        const productSummary = getMovementProductSummary(group.entries);
+        const quantitySummary = getMovementQuantitySummary(group.entries);
 
         return `
           <tr>
             <td>${formatMovementDate(movement.movementDate, movement.createdAt)}</td>
             <td>${escapeHtml(movement.contactName || movement[personField])}</td>
-            <td>${escapeHtml(movement.productName)}</td>
-            <td>${formatNumber(movement.quantity)} ${escapeHtml(movement.unit)}</td>
-            ${hasPdfAction ? `<td><button class="secondary-button small-button" type="button" data-action="download-receipt" data-id="${escapeAttribute(movementDoc.id)}">${escapeHtml(options.actionLabel || "PDF")}</button></td>` : ""}
+            <td>${escapeHtml(productSummary)}</td>
+            <td>${escapeHtml(quantitySummary)}</td>
+            ${hasPdfAction ? `<td><button class="secondary-button small-button" type="button" data-action="download-receipt" data-id="${escapeAttribute(group.id)}">${escapeHtml(options.actionLabel || "PDF")}</button></td>` : ""}
           </tr>
         `;
       }).join("");
     }, (error) => {
       tableBody.innerHTML = `<tr><td class="empty-table" colspan="${columnCount}">${escapeHtml(error.message)}</td></tr>`;
     });
+  }
+
+  function getMovementProductSummary(entries = []) {
+    const productNames = entries.map((entry) => entry.productName || "-");
+    const firstName = productNames[0] || "-";
+
+    return entries.length > 1 ? `${firstName} + ${entries.length - 1} more` : firstName;
+  }
+
+  function getMovementQuantitySummary(entries = []) {
+    if (entries.length === 1) {
+      const entry = entries[0];
+      return `${formatNumber(entry.quantity)} ${entry.unit || ""}`.trim();
+    }
+
+    return `${entries.length} products`;
   }
 
   function subscribeRecentTransactions(tableBody) {
