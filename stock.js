@@ -332,14 +332,15 @@
 
     function renderProducts(items) {
       if (!items.length) {
-        tableBody.innerHTML = `<tr><td class="empty-table" colspan="7">${products.length ? "No products match your search." : "No products added yet."}</td></tr>`;
+        tableBody.innerHTML = `<tr><td class="empty-table" colspan="8">${products.length ? "No products match your search." : "No products added yet."}</td></tr>`;
         return;
       }
 
       const showPrices = canViewPrices();
 
-      tableBody.innerHTML = items.map((product) => `
+      tableBody.innerHTML = items.map((product, index) => `
         <tr>
+          <td>${index + 1}</td>
           <td>${product.imageDataUrl ? `<img class="product-thumb" src="${escapeAttribute(product.imageDataUrl)}" alt="">` : `<span class="product-thumb empty-thumb">No image</span>`}</td>
           <td>${escapeHtml(product.name)}</td>
           <td>${escapeHtml(product.sku)}</td>
@@ -484,13 +485,13 @@
         return;
       }
 
-      inventoryTableBody.innerHTML = filteredProducts.map((product) => {
+      inventoryTableBody.innerHTML = filteredProducts.map((product, index) => {
         const stockStatus = getStockStatus(product);
         const updatedAt = formatDate(product.updatedAt || product.createdAt);
 
         return `
           <tr>
-            <td><span class="checkbox-cell" aria-hidden="true"></span></td>
+            <td>${index + 1}</td>
             <td>${escapeHtml(product.name)}</td>
             <td>${product.imageDataUrl ? `<img class="product-thumb" src="${escapeAttribute(product.imageDataUrl)}" alt="">` : `<span class="product-thumb empty-thumb">No image</span>`}</td>
             <td>${formatNumber(getQuantity(product))} ${escapeHtml(product.unit)}</td>
