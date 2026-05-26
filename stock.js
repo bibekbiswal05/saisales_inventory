@@ -1131,10 +1131,6 @@
       throw new Error("Enter name.");
     }
 
-    if (!phoneNumber) {
-      throw new Error("Enter phone number.");
-    }
-
     if (!movementDate) {
       throw new Error("Select date.");
     }
