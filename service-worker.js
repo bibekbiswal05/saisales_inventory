@@ -1,4 +1,4 @@
-const CACHE_NAME = "sai-sales-pwa-v14";
+const CACHE_NAME = "sai-sales-pwa-v15";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -45,6 +45,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const requestUrl = new URL(request.url);
@@ -53,33 +59,22 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match("./index.html")))
-    );
-    return;
-  }
-
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) {
-        return cached;
-      }
-
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         }
 
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        if (request.mode === "navigate") {
+          return caches.match(request).then((cached) => cached || caches.match("./index.html"));
+        }
+
+        return caches.match(request);
+      })
   );
 });
