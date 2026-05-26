@@ -856,7 +856,18 @@ th {
 }
 
 .batch-entry-table {
-  min-width: 520px;
+  min-width: 580px;
+}
+
+.batch-entry-table th:first-child,
+.batch-entry-table td:first-child {
+  width: 64px;
+  text-align: center;
+}
+
+.batch-row-number {
+  color: #667085;
+  font-weight: 900;
 }
 
 .batch-entry-table th:last-child,

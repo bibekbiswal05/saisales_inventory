@@ -974,6 +974,7 @@
     row.className = "batch-entry-row";
     row.innerHTML = getBatchRowHtml(type, products);
     rowsBody.append(row);
+    updateBatchRowNumbers(rowsBody);
   }
 
   function resetBatchRows(rowsBody, type, products = []) {
@@ -1023,14 +1024,26 @@
       row.querySelector("[data-field='productSearch']").value = productValue;
       row.querySelector("[data-field='quantity']").value = quantityValue;
     });
+    updateBatchRowNumbers(rowsBody);
   }
 
   function getBatchRowHtml(type, products = []) {
     return `
+      <td class="batch-row-number"></td>
       <td><input data-field="productSearch" list="batchProductOptions" placeholder="Type product name, SKU, category" autocomplete="off" required></td>
       <td><input data-field="quantity" type="number" min="1" step="0.01" placeholder="0" required></td>
       <td><button class="icon-action remove-row-button" type="button" aria-label="Remove row">x</button></td>
     `;
+  }
+
+  function updateBatchRowNumbers(rowsBody) {
+    [...rowsBody.querySelectorAll(".batch-entry-row")].forEach((row, index) => {
+      const numberCell = row.querySelector(".batch-row-number");
+
+      if (numberCell) {
+        numberCell.textContent = String(index + 1);
+      }
+    });
   }
 
   function getBatchEntries(rowsBody, type, batchDetails, products = []) {
@@ -1180,6 +1193,7 @@
     }
 
     row.remove();
+    updateBatchRowNumbers(rowsBody);
   });
 
   function subscribeMovements(collectionRef, tableBody, personField, emptyMessage, options = {}) {

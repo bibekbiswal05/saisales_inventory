@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260516-row-add-inline">
+  <link rel="stylesheet" href="css/admin-dashboard.css?v=20260526-row-number">
 </head>
 <body>
   <div class="admin-shell">
@@ -54,7 +54,7 @@
             </div>
             <div class="table-wrap batch-entry-wrap">
               <table class="batch-entry-table">
-                <thead><tr><th>Product</th><th>Quantity</th><th><button class="secondary-button small-button add-row-inline" id="addStockOutRowButton" type="button">+ Add Row</button></th></tr></thead>
+                <thead><tr><th>No.</th><th>Product</th><th>Quantity</th><th><button class="secondary-button small-button add-row-inline" id="addStockOutRowButton" type="button">+ Add Row</button></th></tr></thead>
                 <tbody id="stockOutRows"></tbody>
               </table>
             </div>
@@ -78,7 +78,7 @@
   <script src="firebase.js?v=20260509-stockout-pdf"></script>
   <script src="auth.js?v=20260511-menu-logout"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="stock.js?v=20260526-grouped-stock-history"></script>
+  <script src="stock.js?v=20260526-row-number"></script>
   <script src="pwa.js?v=20260526-refresh-cache"></script>
 </body>
 </html>
